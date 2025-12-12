@@ -1,0 +1,72 @@
+hostname BB-R1
+no ip domain lookup
+banner motd ^C
+************************************************************************
+*                                                                      *
+*      SECURITY WARNING: INTERNET SERVICE PROVIDER (ISP) DEVICE        *
+*                                                                      *
+*  NOTICE: This network device Router is the property of the           *
+*  ISP and is restricted to authorized personnel only. Unauthorized    *
+*  access is strictly prohibited and may result in disciplinary action *
+*  and/or legal prosecution.                                           *
+*                                                                      *
+*  This device plays a critical role in network infrastructure and     *
+*  security. Any unauthorized modifications, monitoring, or misuse     *
+*  of this system is strictly forbidden.                               *
+*                                                                      *
+*  All activity is logged and monitored in real-time. Any suspicious   *
+*  activity will be reported to network security teams.                *
+*                                                                      *
+*  If you are not authorized, disconnect immediately.                  *
+*                                                                      *
+************************************************************************
+^C
+int loopback 0
+ip add  1.1.0.1 255.255.255.255
+ipv6 enable
+ospfv3 10 ipv4 area 0
+ no shutdown
+
+int s1/0
+ip add 90.0.0.1 255.255.255.252
+ipv6 enable
+ospfv3 10 ipv4 area 0
+ no shutdown
+
+int s1/1
+ip add 90.0.0.5 255.255.255.252
+ no shutdown
+
+int s1/2
+ip add 90.0.0.9 255.255.255.252
+ no shutdown
+
+int s1/3
+ip add 90.0.0.13 255.255.255.252
+ no shutdown
+
+ipv6 unicast-routing
+
+router ospfv3 10
+ address-family ipv4 unicast
+passive-interface default
+no passive-interface lo0
+no passive-interface s1/0
+  router-id 1.1.0.1
+ exit-address-family
+exit
+
+router bgp 100
+no bgp default ipv4-unicast
+neighbor 1.1.0.2 remote-as 100
+neighbor 1.1.0.2 update-source lo0
+neighbor 90.0.0.10 remote-as 1000
+neighbor 90.0.0.14 remote-as 2000
+neighbor 90.0.0.6 remote-as 3000
+
+address-family ipv4 unicast
+neighbor 1.1.0.2 activate
+neighbor 1.1.0.2 next-hop-self
+neighbor 90.0.0.10 activate
+neighbor 90.0.0.14 activate
+neighbor 90.0.0.6 activate

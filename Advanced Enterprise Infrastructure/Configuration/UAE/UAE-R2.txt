@@ -1,0 +1,141 @@
+hostname UAE-R2
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+int loopback 0
+ip add 1.1.18.2 255.255.255.255
+ no shutdown
+
+int s1/0
+ip add 172.22.1.46 255.255.255.252
+ no shutdown
+
+int s1/1
+ip add 92.0.0.10 255.255.255.252
+ no shutdown
+
+int e0/1
+no ip add 
+ no shutdown
+
+int e0/1.10
+encapsulation dot1Q 10
+ip add 172.18.10.2 255.255.255.0
+ standby version 2
+ standby 10 ip 172.18.10.254
+ no shutdown
+
+int e0/1.20
+encapsulation dot1Q 20
+ip add  172.18.20.2 255.255.255.0
+ standby version 2
+ standby 20 ip 172.18.20.254
+ no shutdown
+
+int e0/1.90
+encapsulation dot1Q 90
+ip add 172.18.90.2 255.255.255.0
+ standby version 2
+ standby 90 ip 172.18.90.254
+ no shutdown
+exit
+
+ip dhcp pool IT
+network 172.18.10.0 255.255.255.0
+ default-router 172.18.10.254
+exit
+
+ip dhcp pool Administration
+network 172.18.20.0 255.255.255.0
+ default-router 172.18.20.254
+exit
+
+ip dhcp excluded-address 172.18.10.1 172.18.10.9
+ip dhcp excluded-address 172.18.20.1 172.18.20.9
+
+key chain UAEIGRP
+key 18
+key-string uae@eigrp
+cryptographic-algorithm hmac-sha-256
+exit
+
+router EIGRP UAE-EIGRP
+ address-family ipv4 unicast autonomous-system 180
+eigrp router-id 1.1.18.2
+network 1.1.18.2    255.255.255.255
+network 172.22.1.44 255.255.255.252
+network 172.18.10.0 255.255.255.0
+network 172.18.20.0 255.255.255.0
+network 172.18.90.0 255.255.255.0
+
+af-interface default
+passive-interface
+authentication mode hmac-sha-256 7 uae@eigrp
+authentication key-chain UAEIGRP
+exit-af-interface
+
+af-interface s1/0
+no passive-interface
+exit-af-interface
+
+af-interface s1/1
+summary-address 172.18.0.0 255.255.128.0
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/1.10
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/1.20
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/1.90
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface Loopback0
+no passive-interface
+exit-af-interface
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username UAE-R2 privilege 15 secret uaer2@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
+
+
+router bgp 900
+no bgp default ipv4-unicast
+neighbor 92.0.0.9 remote-as 2000
+
+address-family ipv4 unicast
+  network 1.1.18.2 mask 255.255.255.255
+  neighbor 92.0.0.9 activate

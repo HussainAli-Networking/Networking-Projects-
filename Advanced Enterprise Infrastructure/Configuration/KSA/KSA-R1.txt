@@ -1,0 +1,139 @@
+hostname KSA-R1
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+int loopback 0
+ip add  1.1.19.1 255.255.255.255
+ipv6 enable
+ospfv3 190 ipv4 area 0
+ospfv3 190 ipv4 authentication key-chain KSAOSPF
+ no shutdown
+
+int lo 10
+ip add 1.1.19.10 255.255.255.255
+ no shutdown
+
+interface Tunnel1
+ ip address 100.100.100.2 255.255.255.248
+ ip nhrp authentication DMVPN
+ ip nhrp map multicast 93.0.0.6
+ ip nhrp map 100.100.100.1 93.0.0.6
+ ip nhrp network-id 1
+ ip nhrp nhs 100.100.100.1
+ ip nhrp shortcut
+ tunnel source Loopback0
+ tunnel mode gre multipoint
+ tunnel key 999
+
+
+int s1/0
+ip add 172.22.1.49 255.255.255.252
+ipv6 enable
+ospfv3 190 ipv4 area 0
+ospfv3 190 ipv4 authentication key-chain KSAOSPF
+ no shutdown
+
+int s1/1
+ip add 91.0.0.10 255.255.255.252
+ipv6 enable
+ no shutdown
+
+int e0/2
+no ip add 
+duplex full
+ no shutdown
+
+int e0/2.10
+encapsulation dot1Q 10
+ip add 172.19.10.1 255.255.255.0
+ standby version 2
+ standby 10 ip 172.19.10.254
+ standby 10 priority 150
+ standby 10 preempt
+ipv6 enable
+ospfv3 190 ipv4 area 0
+ no shutdown
+
+int e0/2.20
+encapsulation dot1Q 20
+ip add  172.19.20.1 255.255.255.0
+standby version 2
+ standby 20 ip 172.19.20.254
+ standby 20 priority 150
+ipv6 enable
+ospfv3 190 ipv4 area 0
+ standby 20 preempt
+
+int e0/2.90
+encapsulation dot1Q 90
+ip add 172.19.90.1 255.255.255.0
+ standby version 2
+ standby 90 ip 172.19.90.254
+ standby 90 priority 150
+ standby 90 preempt
+ipv6 enable
+ospfv3 190 ipv4 area 0
+ no shutdown
+
+ipv6 unicast-routing
+
+key chain KSAOSPF
+key 19
+key-string manama@eigrp
+cryptographic-algorithm hmac-sha-256
+exit
+exit
+
+router ospfv3 190
+ address-family ipv4 unicast
+  summary-prefix 172.19.0.0/17
+  passive-interface default
+  no passive-interface Ethernet0/2.10
+  no passive-interface Ethernet0/2.20
+  no passive-interface Ethernet0/2.90
+  no passive-interface Serial1/0
+  no passive-interface Serial1/1
+  no passive-interface Loopback0
+  router-id 1.1.19.1
+ exit-address-family
+exit
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username KSA-R1 privilege 15 secret ksar1@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
+
+
+router bgp 800
+no bgp default ipv4-unicast
+neighbor 91.0.0.9 remote-as 1000
+
+address-family ipv4 unicast
+  network 1.1.19.1 mask 255.255.255.255
+  neighbor 91.0.0.9 activate
+
+router EIGRP DMVPN
+ address-family ipv4 unicast autonomous-system 99
+ eigrp router-id 1.1.19.10
+ network 100.100.100.0 255.255.255.248
+ network 1.1.19.10       255.255.255.255
+

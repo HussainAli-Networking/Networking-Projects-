@@ -1,0 +1,56 @@
+hostname UAE-SW1
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Switch is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+vl 10
+name IT
+vl 20 
+name Administration
+vl 90
+name Management/Native
+
+interface Ethernet0/0
+duplex full
+ switchport mode access
+ switchport access vlan 10
+no shut
+
+interface Ethernet0/1
+duplex full
+switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 90
+no shut
+
+interface Ethernet0/2
+duplex full
+switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport trunk native vlan 90
+no shut
+
+interface Ethernet0/3
+duplex full
+ switchport mode access
+ switchport access vlan 20
+no shut
+
+interface vlan 90 
+ip add 172.18.90.101 255.255.255.0
+no shut
+
+ip default-gateway 172.18.90.254

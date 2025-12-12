@@ -1,0 +1,160 @@
+hostname UAE-R1
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+int loopback 0
+ip add 1.1.18.1 255.255.255.255
+ no shutdown
+
+int lo 10
+ip add 1.1.18.10 255.255.255.255
+ no shutdown
+
+interface tunnel 1
+ ip address 100.100.100.3 255.255.255.248
+ ip nhrp authentication DMVPN
+ ip nhrp map multicast 93.0.0.6
+ ip nhrp map 100.100.100.1 93.0.0.6
+ ip nhrp network-id 1
+ ip nhrp nhs 100.100.100.1
+ ip nhrp shortcut
+ tunnel source Loopback0
+ tunnel mode gre multipoint
+ tunnel key 999
+                              
+int s1/0
+ip add 172.22.1.45 255.255.255.252
+ no shutdown
+
+int s1/1
+ip add 92.0.0.6 255.255.255.252
+ no shutdown
+
+int e0/2
+no ip add 
+ no shutdown
+
+int e0/2.10
+encapsulation dot1Q 10
+ip add 172.18.10.1 255.255.255.0
+ standby version 2
+ standby 10 ip 172.18.10.254
+ standby 10 priority 150
+ standby 10 preempt
+ no shutdown
+
+int e0/2.20
+encapsulation dot1Q 20
+ip add  172.18.20.1 255.255.255.0
+standby version 2
+ standby 20 ip 172.18.20.254
+ standby 20 priority 150
+ standby 20 preempt
+ no shutdown
+
+int e0/2.90
+encapsulation dot1Q 90
+ip add 172.18.90.1 255.255.255.0
+ standby version 2
+ standby 90 ip 172.18.90.254
+ standby 90 priority 150
+ standby 90 preempt
+ no shutdown
+
+exit
+
+key chain UAEIGRP
+key 18
+key-string uae@eigrp
+cryptographic-algorithm hmac-sha-256
+exit
+
+router EIGRP UAE-EIGRP
+ address-family ipv4 unicast autonomous-system 180
+eigrp router-id 1.1.18.1
+network 1.1.18.1    255.255.255.255
+network 172.22.1.44 255.255.255.252
+network 172.18.10.0 255.255.255.0
+network 172.18.20.0 255.255.255.0
+network 172.18.90.0 255.255.255.0
+
+af-interface default
+passive-interface
+authentication mode hmac-sha-256 7 uae@eigrp
+authentication key-chain UAEIGRP
+exit-af-interface
+
+af-interface s1/0
+no passive-interface
+exit-af-interface
+
+af-interface s1/1
+summary-address 172.18.0.0 255.255.128.0
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/2.10
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/2.20
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/2.90
+no passive-interface
+no authentication mode 
+no authentication key-chain 
+exit-af-interface
+exit
+
+af-interface Loopback0
+no passive-interface
+exit-af-interface
+
+
+router eigrp DMVPN
+ address-family ipv4 unicast autonomous-system 99
+ eigrp router-id 1.1.18.10
+ network 100.100.100.0  255.255.255.248
+ network 1.1.18.10      255.255.255.255
+
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username UAE-R1 privilege 15 secret uaer1@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
+
+
+router bgp 900
+no bgp default ipv4-unicast
+neighbor 92.0.0.5 remote-as 2000
+
+address-family ipv4 unicast
+  network 1.1.18.1 mask 255.255.255.255
+  neighbor 92.0.0.5 activate

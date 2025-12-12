@@ -1,0 +1,123 @@
+hostname KSA-R2
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+interface Loopback0
+ ip address 1.1.19.2 255.255.255.255
+ ipv6 enable
+ ospfv3 190 ipv4 area 0
+ ospfv3 190 ipv4 authentication key-chain KSAOSPF
+
+int s1/0
+ ip add 172.22.1.50 255.255.255.252
+ ipv6 enable
+ ospfv3 190 ipv4 area 0
+ ospfv3 190 ipv4 authentication key-chain KSAOSPF
+ no shutdown
+
+int s1/1
+ip add 91.0.0.6 255.255.255.252
+ipv6 enable
+ no shutdown
+
+int e0/1
+no ip add 
+duplex full
+ no shutdown
+
+int e0/1.10
+ encapsulation dot1Q 10
+ ip add 172.19.10.2 255.255.255.0
+ standby version 2
+ standby 10 ip 172.19.10.254
+ ipv6 enable
+ ospfv3 190 ipv4 area 0
+ no shutdown
+
+int e0/1.20
+ encapsulation dot1Q 20
+ ip add  172.19.20.2 255.255.255.0
+ standby version 2
+ standby 20 ip 172.19.20.254
+ ipv6 enable
+ ospfv3 190 ipv4 area 0
+ no shutdown
+
+int e0/1.90
+ encapsulation dot1Q 90
+ ip add 172.19.90.2 255.255.255.0
+ standby version 2
+ standby 90 ip 172.19.90.254
+ ipv6 enable
+ ospfv3 190 ipv4 area 0
+ no shutdown
+exit
+
+ip dhcp pool IT
+ network 172.19.10.0 255.255.255.0
+ default-router 172.19.10.254
+exit
+
+ip dhcp pool Administration
+ network 172.19.20.0 255.255.255.0
+ default-router 172.19.20.254
+exit
+
+
+ip dhcp excluded-address 172.19.10.1 172.19.10.9
+ip dhcp excluded-address 172.19.20.1 172.19.20.9
+
+
+ipv6 unicast-routing
+
+key chain KSAOSPF
+key 19
+key-string manama@eigrp
+cryptographic-algorithm hmac-sha-256
+
+
+router ospfv3 190
+ address-family ipv4 unicast
+ summary-prefix 172.19.0.0/17
+ passive-interface default
+  no passive-interface Ethernet0/1.10
+  no passive-interface Ethernet0/1.20
+  no passive-interface Ethernet0/1.90
+  no passive-interface Serial1/0
+  no passive-interface Serial1/1
+  no passive-interface Loopback0
+ router-id 1.1.19.2
+ exit-address-family
+exit
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username KSA-R2 privilege 15 secret ksar2@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
+
+router bgp 800
+no bgp default ipv4-unicast
+neighbor 91.0.0.5 remote-as 1000
+
+address-family ipv4 unicast
+  network 1.1.19.2 mask 255.255.255.255
+  neighbor 91.0.0.5 activate

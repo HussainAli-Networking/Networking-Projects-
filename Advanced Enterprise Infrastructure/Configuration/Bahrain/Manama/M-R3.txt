@@ -1,0 +1,138 @@
+hostname M-R3
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+int loopback 0
+ip add  1.1.16.3 255.255.255.255
+ no shutdown
+
+int s1/0
+ip add 172.22.1.21 255.255.255.252
+ no shutdown
+
+int s1/1
+ip add 172.22.1.6 255.255.255.252
+ no shutdown
+
+int e0/2
+no shutdown
+
+int e0/2.10
+encapsulation dot1Q 10
+ip add 172.16.10.1 255.255.255.0
+ standby version 2
+ standby 10 ip 172.16.10.254
+ standby 10 priority 150
+ standby 10 preempt
+ no shutdown
+
+int e0/2.20
+encapsulation dot1Q 20
+ip add 172.16.20.1 255.255.255.0 
+standby version 2
+ standby 20 ip 172.16.20.254
+ standby 20 priority 150
+ standby 20 preempt
+ no shutdown
+
+int e0/2.30
+encapsulation dot1Q 30
+ip add 172.16.30.1 255.255.255.0
+ standby version 2
+ standby 30 ip 172.16.30.254
+ standby 30 priority 150
+ standby 30 preempt
+ no shutdown
+
+int e0/2.90
+encapsulation dot1Q 90
+ip add 172.16.90.1 255.255.255.0
+ standby version 2
+ standby 90 ip 172.16.90.254
+ standby 90 priority 150
+ standby 90 preempt
+ no shutdown
+
+key chain MNEIGRP
+key 16
+key-string manama@eigrp
+cryptographic-algorithm hmac-sha-256
+exit
+exit
+
+router EIGRP MN-EIGRP
+ address-family ipv4 unicast autonomous-system 160
+eigrp router-id 1.1.16.3
+network 1.1.16.3    255.255.255.255
+network 172.22.1.20 255.255.255.252
+network 172.22.1.4  255.255.255.252
+network 172.16.10.0 255.255.255.0
+network 172.16.20.0 255.255.255.0
+network 172.16.30.0 255.255.255.0
+network 172.16.90.0 255.255.255.0
+
+
+af-interface default
+passive-interface
+authentication mode hmac-sha-256 7 nama@eigrp
+authentication key-chain MNEIGRP
+exit-af-interface
+
+af-interface s1/0
+no passive-interface
+exit-af-interface
+
+af-interface s1/1
+no passive-interface
+exit-af-interface
+
+af-interface e0/2.10
+no passive-interface
+no authentication mode  
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/2.20
+no passive-interface
+no authentication mode  
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/2.30
+no passive-interface
+no authentication mode  
+no authentication key-chain 
+exit-af-interface
+
+af-interface e0/2.90
+no passive-interface
+no authentication mode  
+no authentication key-chain 
+exit-af-interface
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username M-R3 privilege 15 secret mr3@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
+
+ip route 0.0.0.0 0.0.0.0 Serial1/1
+

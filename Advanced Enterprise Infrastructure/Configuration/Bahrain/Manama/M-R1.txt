@@ -1,0 +1,79 @@
+hostname M-R1
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+int loopback 0
+ip add  1.1.16.1 255.255.255.255
+ no shutdown
+
+int s1/0
+ip add 172.22.1.1 255.255.255.252
+ no shutdown
+
+int s1/1
+ip add 172.22.1.5 255.255.255.252
+ no shutdown
+
+int s1/2
+ip add 172.22.1.9 255.255.255.252
+ no shutdown
+
+key chain MNEIGRP
+key 16
+key-string manama@eigrp
+cryptographic-algorithm hmac-sha-256
+exit
+exit
+
+router EIGRP MN-EIGRP
+ address-family ipv4 unicast autonomous-system 160
+eigrp router-id 1.1.16.1
+network 1.1.16.1   255.255.255.255
+network 172.22.1.0 255.255.255.252
+network 172.22.1.4 255.255.255.252
+network 172.22.1.8 255.255.255.252
+
+af-interface default
+passive-interface
+authentication mode hmac-sha-256 7 nama@eigrp
+authentication key-chain MNEIGRP
+exit-af-interface
+
+af-interface s1/0
+no passive-interface
+exit-af-interface
+
+af-interface s1/1
+no passive-interface
+exit-af-interface
+
+af-interface s1/2
+no authentication mode
+no authentication key-chain
+no passive-interface
+exit-af-interface
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username M-R1 privilege 15 secret mr1@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
+

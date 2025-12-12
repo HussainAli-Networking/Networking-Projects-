@@ -1,0 +1,128 @@
+hostname ISA-R3
+no ip domain lookup
+banner motd ^C
+***********************************************************************
+*                                                                     *
+*  SECURITY WARNING: POLYTECH SERVICES SOLUTIONS (PSS) ROUTER         *
+*                                                                     *
+*  NOTICE: This Router is restricted to authorized personnel only.    *
+*  Unauthorized access is strictly prohibited and may lead to         *
+*  disciplinary action or legal prosecution.                          *
+*                                                                     *
+*  This device is monitored to ensure network security and            *
+*  compliance with PSS policies. All activity is logged in real-time. *
+*                                                                     *
+*  If you are not authorized, disconnect immediately.                 * 
+*                                                                     *
+***********************************************************************
+^C
+int loopback 0
+ip add  1.1.17.3 255.255.255.255
+ no shutdown
+
+int s1/1
+ip add 172.22.1.30 255.255.255.252
+ no shutdown
+
+int s1/2
+ip add 172.22.1.42 255.255.255.252
+ no shutdown
+
+int e0/0
+no ip add 
+no shutdown
+
+int e0/0.10
+encapsulation dot1Q 10
+ip add 172.17.10.1 255.255.255.0
+ standby version 2
+ standby 10 ip 172.17.10.254
+ no shutdown
+
+int e0/0.20
+encapsulation dot1Q 20
+ip add 172.17.20.1 255.255.255.0 
+standby version 2
+ standby 20 ip 172.17.20.254
+
+int e0/0.90
+encapsulation dot1Q 90
+ip add 172.17.90.1 255.255.255.0
+ standby version 2
+ standby 90 ip 172.17.90.254
+ no shutdown
+
+ip dhcp pool IT
+network 172.17.10.0 255.255.255.0
+ default-router 172.17.10.254
+exit
+
+ip dhcp pool Administration
+network 172.17.20.0 255.255.255.0
+ default-router 172.17.20.254
+exit
+
+ip dhcp excluded-address 172.17.10.1 172.17.10.9
+ip dhcp excluded-address 172.17.20.1 172.17.20.9
+
+
+key chain ISAEIGRP
+key 19
+key-string ISA@eigrp
+cryptographic-algorithm hmac-sha-256
+exit
+exit
+
+router eigrp ISA-EIGRP
+address-family ipv4 unicast autonomous-system 160
+
+network  1.1.17.3    255.255.255.255
+network  172.22.1.28 255.255.255.252
+network  172.22.1.40 255.255.255.252
+network  172.17.10.0 255.255.255.0
+network  172.17.20.0 255.255.255.0
+network  172.17.90.0 255.255.255.0
+eigrp router-id 1.1.17.3
+
+af-interface default
+passive-interface
+authentication mode hmac-sha-256 7 ISA@eigrp
+authentication key-chain ISAEIGRP
+exit-af-interface
+
+af-interface s1/1
+no passive-interface
+exit-af-interface
+
+af-interface s1/2
+no passive-interface
+exit-af-interface
+
+af-interface e0/0.10
+no authentication mode
+no authentication key-chain
+no passive-interface
+exit-af-interface
+
+af-interface e0/0.20
+no authentication mode
+no authentication key-chain
+no passive-interface
+exit-af-interface
+
+af-interface e0/0.90
+no authentication mode
+no authentication key-chain
+no passive-interface
+exit-af-interface
+
+
+ip domain-name PSS.com
+crypto key generate rsa
+1024
+username ISA-R3 privilege 15 secret isar3@ssh
+line vty 0 4
+login local
+transport input ssh
+exit
+ip ssh version 2
