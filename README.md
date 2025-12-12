@@ -117,7 +117,7 @@ It is intended for academic review, technical reference, and skill demonstration
 
 - **Email:** hussainali.networking@gmail.com  
 - **GitHub:** https://github.com/HussainAli-Networking  
-- **YouTube:** @Hussain.Networking
+- **YouTube:** [@Hussain.Networking](https://www.youtube.com/@Hussain.Networking)
 
 ---
 
