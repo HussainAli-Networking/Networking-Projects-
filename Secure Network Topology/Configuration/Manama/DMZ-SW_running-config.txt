@@ -1,0 +1,225 @@
+!
+version 15.0
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+service password-encryption
+!
+hostname DMZ-SW
+!
+enable secret 5 $1$mERr$DrpQIh70AAR7dwpvNNETq0
+!
+!
+!
+ip ssh version 2
+no ip domain-lookup
+ip domain-name mnc.com
+!
+username DMZ-SW secret 5 $1$mERr$DrpQIh70AAR7dwpvNNETq0
+!
+!
+!
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface FastEthernet0/1
+ switchport mode trunk
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+!
+interface FastEthernet0/2
+ switchport mode trunk
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+!
+interface FastEthernet0/3
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/4
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/5
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/6
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/7
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/8
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/9
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/10
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/11
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/12
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/13
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/14
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/15
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/16
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/17
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/18
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/19
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/20
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/21
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/22
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/23
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface FastEthernet0/24
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface GigabitEthernet0/1
+ switchport mode trunk
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+!
+interface GigabitEthernet0/2
+ switchport port-security maximum 3
+ switchport port-security mac-address sticky 
+ switchport port-security violation restrict 
+ shutdown
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan100
+ ip address 172.20.100.10 255.255.255.0
+!
+ip default-gateway 172.20.100.254
+!
+banner motd ^
+********************************************************************
+*                                                                  *
+*                  SECURITY NOTICE: DMZ SWITCH                     *
+*                                                                  *
+*  WARNING: This DMZ switch is restricted to authorized personnel  *
+*  only. Unauthorized access is strictly prohibited and may result *
+*  in disciplinary action or legal prosecution.                    *
+*                                                                  *
+*  This switch is a critical component of the DMZ, providing       *
+*  secure network segmentation and managing external connections.  *
+*  All activity on this device is logged and monitored.            *
+*                                                                  *
+*  If you do not have authorization, disconnect immediately.       *
+*                                                                  *
+********************************************************************
+^
+!
+!
+!
+line con 0
+ exec-timeout 5 0
+!
+line vty 0 4
+ exec-timeout 5 0
+ login
+ transport input ssh
+line vty 5 15
+ exec-timeout 5 0
+ login
+ transport input ssh
+!
+!
+!
+!
+end
+
