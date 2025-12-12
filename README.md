@@ -115,9 +115,9 @@ It is intended for academic review, technical reference, and skill demonstration
 
 ## Contact & Links
 
-- [**Email:**](hussainali.networking@gmail.com) 
-- [**GitHub:**](https://github.com/HussainAli-Networking)  
-- [**YouTube:**](https://www.youtube.com/@Hussain.Networking)
+- [**Email**](hussainali.networking@gmail.com) 
+- [**GitHub**](https://github.com/HussainAli-Networking)  
+- [**YouTube**](https://www.youtube.com/@Hussain.Networking)
 
 ---
 
