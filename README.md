@@ -21,7 +21,6 @@ My work focuses on:
 ## Main Projects
 
 ### Global Health Network (GHN) – Graduation Project  
-**Status:** In Progress
 
 A large-scale, multi-site enterprise network designed using **defense-in-depth** architecture principles.
 
